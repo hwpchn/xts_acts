@@ -1,0 +1,39 @@
+/**
+ * @tc.number    : SUB_PHOTOACCESS_HELPER_CALLBACK_GET_THUMBNAIL_2400
+ * @tc.name      : getThumbnail_callback_024
+ * @tc.desc      : getThumbnail(image) with invalid size parameter to trigger 13900020
+ * @tc.size      : MEDIUM
+ * @tc.type      : Function
+ * @tc.level     : Level 2
+ */
+it('getThumbnail_callback_024', 2, async (done: Function) => {
+  const testNum = 'getThumbnail_callback_024';
+  const fetchOps: photoAccessHelper.FetchOptions = fetchOption(testNum, photoKeys.DISPLAY_NAME, 'getThumb.jpg');
+  // Passing an invalid size object with string values instead of numbers
+  const size: ESObject = {
+    width: "invalid", 
+    height: "invalid"
+  };
+  
+  try {
+    let asset: photoAccessHelper.PhotoAsset = await getFileAsset(testContext, testNum, fetchOps);
+    asset.getThumbnail(size, async (err, pixelMap) => {
+      if (err) {
+        console.info(`${testNum} err: ${err}`);
+        // Expect error code "13900020" as a string for invalid argument
+        expect(err.code.toString()).assertEqual("13900020");
+        expect(true).assertTrue();
+      } else {
+        console.info(`${testNum} unexpectedly succeeded`);
+        expect(false).assertTrue();
+      }
+      done();
+    });
+  } catch (error) {
+    console.info(`${testNum} failed; error: ${error}`);
+    // Handle the error code as a string
+    expect(error.code.toString()).assertEqual("13900020");
+    expect(true).assertTrue();
+    done();
+  }
+});
