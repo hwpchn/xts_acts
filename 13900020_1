@@ -72,3 +72,36 @@ it('getThumbnail_callback_024', 2, async (done: Function) => {
       }
     });
 
+
+
+/**
+ * @tc.number    : SUB_PHOTOACCESS_HELPER_CALLBACK_GET_THUMBNAIL_2400
+ * @tc.name      : getThumbnail_callback_2400
+ * @tc.desc      : Test getThumbnail with invalid size (callback) - expect error 401
+ * @tc.size      : MEDIUM
+ * @tc.type      : Function
+ * @tc.level     : Level 2
+ */
+it('getThumbnail_callback_2400', 2, async (done: Function) => {
+  const testNum = 'getThumbnail_callback_2400';
+  const fetchOps: photoAccessHelper.FetchOptions = fetchOption(testNum, photoKeys.DISPLAY_NAME, 'getThumb.jpg');
+  try {
+    let asset: photoAccessHelper.PhotoAsset = await getFileAsset(testContext, testNum, fetchOps);
+    // 传入 null 作为 size，触发必填参数缺失导致的 401 错误
+    asset.getThumbnail(null, (err, pixelMap) => {
+      if (err) {
+        // 验证错误码是否为 401
+        expect(err.code).assertEqual(401);
+      } else {
+        // 如果没有错误，则测试失败
+        expect(false).assertTrue();
+      }
+      done();
+    });
+  } catch (error) {
+    console.info(`${testNum} failed; error: ${error}`);
+    expect(false).assertTrue();
+    done();
+  }
+});
+
