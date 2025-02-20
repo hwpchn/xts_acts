@@ -193,3 +193,42 @@
       }
     });
   });
+============================第二次生成
+    /**
+     * @tc.number    : SUB_PHOTOACCESS_HELPER_CALLBACK_GET_ALBUMS_0500
+     * @tc.name      : getAlbums_callback_005
+     * @tc.desc      : Test getAlbums with invalid options parameter to return error code 401
+     * @tc.size      : MEDIUM
+     * @tc.type      : Function
+     * @tc.level     : Level 2
+     */
+    it('getAlbums_callback_005', 2, async (done: Function) => {
+      const testNum = 'getAlbums_callback_005';
+      try {
+        // 使用无效的 options 参数，例如 fetchColumns 传递错误类型
+        const invalidFetchOps = {
+          fetchColumns: "invalid_type" as any, // fetchColumns 应为 string[]，这里故意传入 string 类型
+          predicates: new dataSharePredicates.DataSharePredicates()
+        };
+        
+        helper.getAlbums(albumType.USER, albumSubtype.USER_GENERIC, invalidFetchOps, (err, fetchResult) => {
+          try {
+            if (err !== undefined) {
+              console.info(`${testNum} getAlbums failed as expected with err: ${err.code}`);
+              expect(err.code).assertEqual(401); // 验证错误码为 401
+            } else {
+              console.info(`${testNum} getAlbums unexpectedly succeeded`);
+              expect(false).assertTrue(); // 如果没有抛出错误，则测试失败
+            }
+          } catch (error) {
+            console.info(`${testNum} error during callback: ${error}`);
+            expect(false).assertTrue();
+          }
+          done();
+        });
+      } catch (error) {
+        console.info(`${testNum} failed, error: ${JSON.stringify(error)}`);
+        expect(false).assertTrue();
+        done();
+      }
+    });
