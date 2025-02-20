@@ -232,3 +232,39 @@
         done();
       }
     });
+/**
+ * @tc.number    : SUB_PHOTOACCESS_HELPER_CALLBACK_GET_ALBUMS_0600
+ * @tc.name      : getAlbums_callback_006
+ * @tc.desc      : 测试通过无效的subtype触发错误码13900020
+ * @tc.size      : MEDIUM
+ * @tc.type      : Function
+ * @tc.level     : Level 2
+ */
+it('getAlbums_callback_006', 2, async (done: Function) => {
+  const testNum = 'getAlbums_callback_006';
+  try {
+    // 假设AlbumSubtype是枚举类型，未定义-1，因此-1是无效值
+    const invalidSubtype = -1 as photoAccessHelper.AlbumSubtype;
+
+    // 调用getAlbums接口，传入无效的subtype
+    helper.getAlbums(albumType.USER, invalidSubtype, (err, fetchResult) => {
+      try {
+        if (err !== undefined) {
+          console.info(`${testNum} getAlbums失败，错误码: ${err.code}`);
+          expect(err.code).assertEqual(13900020); // 验证错误码是否为13900020
+        } else {
+          console.info(`${testNum} getAlbums意外成功`);
+          expect(false).assertTrue(); // 如果没有错误，测试失败
+        }
+      } catch (error) {
+        console.info(`${testNum} 回调中出错: ${error}`);
+        expect(false).assertTrue();
+      }
+      done();
+    });
+  } catch (error) {
+    console.info(`${testNum} 执行失败: ${JSON.stringify(error)}`);
+    expect(false).assertTrue();
+    done();
+  }
+});
