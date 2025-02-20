@@ -1,0 +1,195 @@
+   // 新增测试用例：验证401错误 - 必填参数未指定
+    /**
+     * @tc.number    : SUB_PHOTOACCESS_HELPER_CALLBACK_GET_ALBUMS_0300
+     * @tc.name      : getAlbums_callback_401_missing_callback
+     * @tc.desc      : Test getAlbums with missing callback parameter, expect 401 error
+     * @tc.size      : MEDIUM
+     * @tc.type      : Function
+     * @tc.level     : Level 2
+     */
+    it('getAlbums_callback_401_missing_callback', 0, async (done: Function) => {
+      const testNum = 'getAlbums_callback_401_missing_callback';
+      try {
+        // 省略 callback 参数
+        helper.getAlbums(albumType.USER, albumSubtype.USER_GENERIC, {});
+      } catch (error) {
+        console.info(`${testNum} expected error: ${error}`);
+        expect(error.code).assertEqual(401);
+        done();
+      }
+    });
+
+    /**
+     * @tc.number    : SUB_PHOTOACCESS_HELPER_CALLBACK_GET_ALBUMS_0400
+     * @tc.name      : getAlbums_callback_401_missing_options
+     * @tc.desc      : Test getAlbums with missing options parameter, expect 401 error
+     * @tc.size      : MEDIUM
+     * @tc.type      : Function
+     * @tc.level     : Level 2
+     */
+    it('getAlbums_callback_401_missing_options', 0, async (done: Function) => {
+      const testNum = 'getAlbums_callback_401_missing_options';
+      try {
+        // 省略 options 参数
+        helper.getAlbums(albumType.USER, albumSubtype.USER_GENERIC, (err, fetchResult) => {
+          expect(false).assertTrue(); // 不应进入回调
+          done();
+        });
+      } catch (error) {
+        console.info(`${testNum} expected error: ${error}`);
+        expect(error.code).assertEqual(401);
+        done();
+      }
+    });
+
+    // 新增测试用例：验证401错误 - 参数类型不正确
+    /**
+     * @tc.number    : SUB_PHOTOACCESS_HELPER_CALLBACK_GET_ALBUMS_0500
+     * @tc.name      : getAlbums_callback_401_invalid_type
+     * @tc.desc      : Test getAlbums with invalid type parameter, expect 401 error
+     * @tc.size      : MEDIUM
+     * @tc.type      : Function
+     * @tc.level     : Level 2
+     */
+    it('getAlbums_callback_401_invalid_type', 0, async (done: Function) => {
+      const testNum = 'getAlbums_callback_401_invalid_type';
+      try {
+        // type 参数传入字符串，应为 AlbumType 枚举值
+        helper.getAlbums('invalidType' as any, albumSubtype.USER_GENERIC, {}, (err, fetchResult) => {
+          if (err) {
+            console.info(`${testNum} expected error: ${err}`);
+            expect(err.code).assertEqual(401);
+            done();
+          } else {
+            expect(false).assertTrue();
+            done();
+          }
+        });
+      } catch (error) {
+        console.info(`${testNum} unexpected error: ${error}`);
+        expect(false).assertTrue();
+        done();
+      }
+    });
+
+    /**
+     * @tc.number    : SUB_PHOTOACCESS_HELPER_CALLBACK_GET_ALBUMS_0600
+     * @tc.name      : getAlbums_callback_401_invalid_subtype
+     * @tc.desc      : Test getAlbums with invalid subtype parameter, expect 401 error
+     * @tc.size      : MEDIUM
+     * @tc.type      : Function
+     * @tc.level     : Level 2
+     */
+    it('getAlbums_callback_401_invalid_subtype', 0, async (done: Function) => {
+      const testNum = 'getAlbums_callback_401_invalid_subtype';
+      try {
+        // subtype 参数传入数字，应为 AlbumSubtype 枚举值
+        helper.getAlbums(albumType.USER, 123 as any, {}, (err, fetchResult) => {
+          if (err) {
+            console.info(`${testNum} expected error: ${err}`);
+            expect(err.code).assertEqual(401);
+            done();
+          } else {
+            expect(false).assertTrue();
+            done();
+          }
+        });
+      } catch (error) {
+        console.info(`${testNum} unexpected error: ${error}`);
+        expect(false).assertTrue();
+        done();
+      }
+    });
+
+    /**
+     * @tc.number    : SUB_PHOTOACCESS_HELPER_CALLBACK_GET_ALBUMS_0700
+     * @tc.name      : getAlbums_callback_401_invalid_options
+     * @tc.desc      : Test getAlbums with invalid options parameter, expect 401 error
+     * @tc.size      : MEDIUM
+     * @tc.type      : Function
+     * @tc.level     : Level 2
+     */
+    it('getAlbums_callback_401_invalid_options', 0, async (done: Function) => {
+      const testNum = 'getAlbums_callback_401_invalid_options';
+      try {
+        // options 参数传入数组，应为 FetchOptions 对象
+        helper.getAlbums(albumType.USER, albumSubtype.USER_GENERIC, [] as any, (err, fetchResult) => {
+          if (err) {
+            console.info(`${testNum} expected error: ${err}`);
+            expect(err.code).assertEqual(401);
+            done();
+          } else {
+            expect(false).assertTrue();
+            done();
+          }
+        });
+      } catch (error) {
+        console.info(`${testNum} unexpected error: ${error}`);
+        expect(false).assertTrue();
+        done();
+      }
+    });
+
+    // 新增测试用例：验证401错误 - 参数验证失败
+    /**
+     * @tc.number    : SUB_PHOTOACCESS_HELPER_CALLBACK_GET_ALBUMS_0800
+     * @tc.name      : getAlbums_callback_401_invalid_type_value
+     * @tc.desc      : Test getAlbums with invalid type enum value, expect 401 error
+     * @tc.size      : MEDIUM
+     * @tc.type      : Function
+     * @tc.level     : Level 2
+     */
+    it('getAlbums_callback_401_invalid_type_value', 0, async (done: Function) => {
+      const testNum = 'getAlbums_callback_401_invalid_type_value';
+      try {
+        // type 参数传入无效枚举值 (假设 999 不在 AlbumType 中)
+        helper.getAlbums(999 as any, albumSubtype.USER_GENERIC, {}, (err, fetchResult) => {
+          if (err) {
+            console.info(`${testNum} expected error: ${err}`);
+            expect(err.code).assertEqual(401);
+            done();
+          } else {
+            expect(false).assertTrue();
+            done();
+          }
+        });
+      } catch (error) {
+        console.info(`${testNum} unexpected error: ${error}`);
+        expect(false).assertTrue();
+        done();
+      }
+    });
+
+    /**
+     * @tc.number    : SUB_PHOTOACCESS_HELPER_CALLBACK_GET_ALBUMS_0900
+     * @tc.name      : getAlbums_callback_401_invalid_predicates
+     * @tc.desc      : Test getAlbums with invalid predicates in options, expect 401 error
+     * @tc.size      : MEDIUM
+     * @tc.type      : Function
+     * @tc.level     : Level 2
+     */
+    it('getAlbums_callback_401_invalid_predicates', 0, async (done: Function) => {
+      const testNum = 'getAlbums_callback_401_invalid_predicates';
+      try {
+        const invalidPredicates = { invalid: 'value' }; // 非法 predicates
+        const fetchOps: photoAccessHelper.FetchOptions = {
+          fetchColumns: [],
+          predicates: invalidPredicates as any,
+        };
+        helper.getAlbums(albumType.USER, albumSubtype.USER_GENERIC, fetchOps, (err, fetchResult) => {
+          if (err) {
+            console.info(`${testNum} expected error: ${err}`);
+            expect(err.code).assertEqual(401);
+            done();
+          } else {
+            expect(false).assertTrue();
+            done();
+          }
+        });
+      } catch (error) {
+        console.info(`${testNum} unexpected error: ${error}`);
+        expect(false).assertTrue();
+        done();
+      }
+    });
+  });
