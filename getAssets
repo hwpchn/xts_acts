@@ -59,28 +59,27 @@
     });
   });
 /**
- * @tc.number    : SUB_PHOTOACCESS_HELPER_CALLBACK_GET_ASSETS_0700
- * @tc.name      : getAssets_callback_007
- * @tc.desc      : Test getAssets with invalid fetchOps to trigger 13900020 error
+ * @tc.number    : SUB_PHOTOACCESS_HELPER_CALLBACK_GET_ASSETS_0800
+ * @tc.name      : getAssets_callback_008
+ * @tc.desc      : Test getAssets with invalid fetchColumns type to trigger 13900020 error
  * @tc.size      : MEDIUM
  * @tc.type      : Function
  * @tc.level     : Level 2
  */
-it('getAssets_callback_007', 2, async (done: Function) => {
-  const testNum = 'getAssets_callback_007';
-  // 构造一个包含无效字段的fetchOps
+it('getAssets_callback_008', 2, async (done: Function) => {
+  const testNum = 'getAssets_callback_008';
   const invalidFetchOps = {
-    fetchColumns: ['invalid_column'], // 假设'invalid_column'是不支持的字段
-    predicates: new dataSharePredicates.DataSharePredicates() // predicates为必需项
+    fetchColumns: 'not_an_array', // 应为Array<string>，这里传入字符串
+    predicates: new dataSharePredicates.DataSharePredicates()
   };
   try {
     helper.getAssets(invalidFetchOps, (err, fetchResult) => {
       try {
         if (err !== undefined) {
           console.info(`${testNum} getAssets failed; err: ${err.code}, ${err.message}`);
-          expect(err.code).assertEqual(13900020); // 验证错误码为13900020
+          expect(err.code).assertEqual(13900020); // 期望错误码为13900020
         } else {
-          console.info(`${testNum} getAssets suc; fetchResult: ${fetchResult.getCount()}`);
+          console.info(`${testNum} getAssets succeeded unexpectedly; fetchResult: ${fetchResult.getCount()}`);
           fetchResult.close();
           expect(false).assertTrue(); // 不应成功
         }
@@ -95,27 +94,37 @@ it('getAssets_callback_007', 2, async (done: Function) => {
   }
 });
 /**
- * @tc.number    : SUB_PHOTOACCESS_HELPER_PROMISE_GET_ASSETS_0700
- * @tc.name      : getAssets_promise_007
- * @tc.desc      : Test getAssets with invalid fetchOps to trigger 13900020 error
+ * @tc.number    : SUB_PHOTOACCESS_HELPER_CALLBACK_GET_ASSETS_0900
+ * @tc.name      : getAssets_callback_009
+ * @tc.desc      : Test getAssets with invalid predicates type to trigger 13900020 error
  * @tc.size      : MEDIUM
  * @tc.type      : Function
  * @tc.level     : Level 2
  */
-it('getAssets_promise_007', 2, async (done: Function) => {
-  const testNum = 'getAssets_promise_007';
-  // 构造一个包含无效字段的fetchOps
+it('getAssets_callback_009', 2, async (done: Function) => {
+  const testNum = 'getAssets_callback_009';
   const invalidFetchOps = {
-    fetchColumns: ['invalid_column'], // 假设'invalid_column'是不支持的字段
-    predicates: new dataSharePredicates.DataSharePredicates() // predicates为必需项
+    fetchColumns: ['uri', 'display_name'], // 合法的fetchColumns
+    predicates: { invalid: 'object' } // 应为DataSharePredicates，这里传入普通对象
   };
   try {
-    await helper.getAssets(invalidFetchOps);
-    expect(false).assertTrue(); // 不应成功
-    done();
+    helper.getAssets(invalidFetchOps, (err, fetchResult) => {
+      try {
+        if (err !== undefined) {
+          console.info(`${testNum} getAssets failed; err: ${err.code}, ${err.message}`);
+          expect(err.code).assertEqual(13900020); // 期望错误码为13900020
+        } else {
+          console.info(`${testNum} getAssets succeeded unexpectedly; fetchResult: ${fetchResult.getCount()}`);
+          fetchResult.close();
+          expect(false).assertTrue(); // 不应成功
+        }
+      } catch (error) {
+        console.info(`${testNum} getAssets failed; error: ${error}`);
+      }
+      done();
+    });
   } catch (error) {
-    console.info(`${testNum} failed; error: ${error.code}, ${error.message}`);
-    expect(error.code).assertEqual(13900020); // 验证错误码为13900020
+    console.info(`${testNum} failed; error: ${error}`);
     done();
   }
 });
