@@ -1,4 +1,7 @@
     // 新增回调方式测试401错误码
+    //参数选择：
+    //使用"invalid"作为fetchOps，因为FetchOptions是一个对象类型，传递字符串会导致参数类型不正确，从而触发401错误码。
+   //您也可以尝试其他无效参数，例如null、{}（空对象）或缺少predicates的对象，具体取决于FetchOptions的实现细节。
     /**
      * @tc.number    : SUB_PHOTOACCESS_HELPER_CALLBACK_GET_ASSETS_0500
      * @tc.name      : getAssets_callback_005
