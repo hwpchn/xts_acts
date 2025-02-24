@@ -1,0 +1,206 @@
+1. 缺少 imageFileUri 的处理器
+class ErrorHandlerMissingImageUri implements photoAccessHelper.MediaAssetDataHandler<photoAccessHelper.MovingPhoto> {
+  async onDataPrepared(movingPhoto: photoAccessHelper.MovingPhoto) {
+    console.log("ErrorHandlerMissingImageUri::movingPhoto onDataPrepared");
+    try {
+      await movingPhoto.requestContent(undefined, "file://valid/video.mp4");
+      console.error("ErrorHandlerMissingImageUri: requestContent should have thrown an error");
+      expect(false).assertTrue();
+    } catch (error) {
+      console.log(`ErrorHandlerMissingImageUri: caught error with code ${error.code}`);
+      expect(error.code).assertEqual(401);
+    }
+  }
+}
+
+2. 缺少 videoFileUri 的处理器
+class ErrorHandlerMissingVideoUri implements photoAccessHelper.MediaAssetDataHandler<photoAccessHelper.MovingPhoto> {
+  async onDataPrepared(movingPhoto: photoAccessHelper.MovingPhoto) {
+    console.log("ErrorHandlerMissingVideoUri::movingPhoto onDataPrepared");
+    try {
+      await movingPhoto.requestContent("file://valid/image.jpg", undefined);
+      console.error("ErrorHandlerMissingVideoUri: requestContent should have thrown an error");
+      expect(false).assertTrue();
+    } catch (error) {
+      console.log(`ErrorHandlerMissingVideoUri: caught error with code ${error.code}`);
+      expect(error.code).assertEqual(401);
+    }
+  }
+}
+3. 两个参数均缺失的处理器
+class ErrorHandlerBothMissing implements photoAccessHelper.MediaAssetDataHandler<photoAccessHelper.MovingPhoto> {
+  async onDataPrepared(movingPhoto: photoAccessHelper.MovingPhoto) {
+    console.log("ErrorHandlerBothMissing::movingPhoto onDataPrepared");
+    try {
+      await movingPhoto.requestContent(undefined, undefined);
+      console.error("ErrorHandlerBothMissing: requestContent should have thrown an error");
+      expect(false).assertTrue();
+    } catch (error) {
+      console.log(`ErrorHandlerBothMissing: caught error with code ${error.code}`);
+      expect(error.code).assertEqual(401);
+    }
+  }
+}
+4. imageFileUri 类型错误的处理器
+class ErrorHandlerNonStringImageUri implements photoAccessHelper.MediaAssetDataHandler<photoAccessHelper.MovingPhoto> {
+  async onDataPrepared(movingPhoto: photoAccessHelper.MovingPhoto) {
+    console.log("ErrorHandlerNonStringImageUri::movingPhoto onDataPrepared");
+    try {
+      await movingPhoto.requestContent(123 as any, "file://valid/video.mp4");
+      console.error("ErrorHandlerNonStringImageUri: requestContent should have thrown an error");
+      expect(false).assertTrue();
+    } catch (error) {
+      console.log(`ErrorHandlerNonStringImageUri: caught error with code ${error.code}`);
+      expect(error.code).assertEqual(401);
+    }
+  }
+}
+5. videoFileUri 类型错误的处理器
+class ErrorHandlerNonStringVideoUri implements photoAccessHelper.MediaAssetDataHandler<photoAccessHelper.MovingPhoto> {
+  async onDataPrepared(movingPhoto: photoAccessHelper.MovingPhoto) {
+    console.log("ErrorHandlerNonStringVideoUri::movingPhoto onDataPrepared");
+    try {
+      await movingPhoto.requestContent("file://valid/image.jpg", 456 as any);
+      console.error("ErrorHandlerNonStringVideoUri: requestContent should have thrown an error");
+      expect(false).assertTrue();
+    } catch (error) {
+      console.log(`ErrorHandlerNonStringVideoUri: caught error with code ${error.code}`);
+      expect(error.code).assertEqual(401);
+    }
+  }
+}
+6. 无效 URI 的处理器
+class ErrorHandlerInvalidUri implements photoAccessHelper.MediaAssetDataHandler<photoAccessHelper.MovingPhoto> {
+  async onDataPrepared(movingPhoto: photoAccessHelper.MovingPhoto) {
+    console.log("ErrorHandlerInvalidUri::movingPhoto onDataPrepared");
+    try {
+      await movingPhoto.requestContent("invalid_image", "invalid_video");
+      console.error("ErrorHandlerInvalidUri: requestContent should have thrown an error");
+      expect(false).assertTrue();
+    } catch (error) {
+      console.log(`ErrorHandlerInvalidUri: caught error with code ${error.code}`);
+      expect(error.code).assertEqual(401);
+    }
+  }
+}
+修改 requestMovingPhotoContent 函数
+在 requestMovingPhotoContent 函数的 switch 语句中添加新分支，用于选择上述错误处理器：
+switch (case_num) {
+  case 0:
+    handler = new MovingPhotoHandler();
+    console.log(`${testNum}::handler::MovingPhotoHandler`);
+    break;
+  // ... 其他现有分支
+  case 4:
+    handler = new ErrorHandlerMissingImageUri();
+    break;
+  case 5:
+    handler = new ErrorHandlerMissingVideoUri();
+    break;
+  case 6:
+    handler = new ErrorHandlerBothMissing();
+    break;
+  case 7:
+    handler = new ErrorHandlerNonStringImageUri();
+    break;
+  case 8:
+    handler = new ErrorHandlerNonStringVideoUri();
+    break;
+  case 9:
+    handler = new ErrorHandlerInvalidUri();
+    break;
+  default:
+    console.error(`${testNum}::requestMovingPhotoContent::illegal case_num: ${case_num}`);
+    expect(false).assertTrue();
+    done();
+}
+
+/**
+ * @tc.number    : SUB_PHOTOACCESS_HELPER_REQUEST_CONTENT_ERROR_0001
+ * @tc.name      : request_moving_photo_content_error_0001
+ * @tc.desc      : Test requestContent with missing imageFileUri
+ * @tc.size      : MEDIUM
+ * @tc.type      : Function
+ * @tc.level     : Level 0
+ */
+it('request_moving_photo_content_error_0001', 0, async (done: Function) => {
+  const testNum = 'request_moving_photo_content_error_0001';
+  await requestMovingPhotoContent(done, testNum, 4, false);
+  await sleep(1000);
+  done();
+});
+
+/**
+ * @tc.number    : SUB_PHOTOACCESS_HELPER_REQUEST_CONTENT_ERROR_0002
+ * @tc.name      : request_moving_photo_content_error_0002
+ * @tc.desc      : Test requestContent with missing videoFileUri
+ * @tc.size      : MEDIUM
+ * @tc.type      : Function
+ * @tc.level     : Level 0
+ */
+it('request_moving_photo_content_error_0002', 0, async (done: Function) => {
+  const testNum = 'request_moving_photo_content_error_0002';
+  await requestMovingPhotoContent(done, testNum, 5, false);
+  await sleep(1000);
+  done();
+});
+
+/**
+ * @tc.number    : SUB_PHOTOACCESS_HELPER_REQUEST_CONTENT_ERROR_0003
+ * @tc.name      : request_moving_photo_content_error_0003
+ * @tc.desc      : Test requestContent with both parameters missing
+ * @tc.size      : MEDIUM
+ * @tc.type      : Function
+ * @tc.level     : Level 0
+ */
+it('request_moving_photo_content_error_0003', 0, async (done: Function) => {
+  const testNum = 'request_moving_photo_content_error_0003';
+  await requestMovingPhotoContent(done, testNum, 6, false);
+  await sleep(1000);
+  done();
+});
+
+/**
+ * @tc.number    : SUB_PHOTOACCESS_HELPER_REQUEST_CONTENT_ERROR_0004
+ * @tc.name      : request_moving_photo_content_error_0004
+ * @tc.desc      : Test requestContent with non-string imageFileUri
+ * @tc.size      : MEDIUM
+ * @tc.type      : Function
+ * @tc.level     : Level 0
+ */
+it('request_moving_photo_content_error_0004', 0, async (done: Function) => {
+  const testNum = 'request_moving_photo_content_error_0004';
+  await requestMovingPhotoContent(done, testNum, 7, false);
+  await sleep(1000);
+  done();
+});
+
+/**
+ * @tc.number    : SUB_PHOTOACCESS_HELPER_REQUEST_CONTENT_ERROR_0005
+ * @tc.name      : request_moving_photo_content_error_0005
+ * @tc.desc      : Test requestContent with non-string videoFileUri
+ * @tc.size      : MEDIUM
+ * @tc.type      : Function
+ * @tc.level     : Level 0
+ */
+it('request_moving_photo_content_error_0005', 0, async (done: Function) => {
+  const testNum = 'request_moving_photo_content_error_0005';
+  await requestMovingPhotoContent(done, testNum, 8, false);
+  await sleep(1000);
+  done();
+});
+
+/**
+ * @tc.number    : SUB_PHOTOACCESS_HELPER_REQUEST_CONTENT_ERROR_0006
+ * @tc.name      : request_moving_photo_content_error_0006
+ * @tc.desc      : Test requestContent with invalid URIs
+ * @tc.size      : MEDIUM
+ * @tc.type      : Function
+ * @tc.level     : Level 0
+ */
+it('request_moving_photo_content_error_0006', 0, async (done: Function) => {
+  const testNum = 'request_moving_photo_content_error_0006';
+  await requestMovingPhotoContent(done, testNum, 9, false);
+  await sleep(1000);
+  done();
+});
