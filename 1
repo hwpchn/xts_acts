@@ -1,0 +1,49 @@
+it('requestContent_with_invalid_URIs_throws_401', 0, async (done: Function) => {
+  const testNum = 'requestContent_with_invalid_URIs_throws_401';
+  try {
+    // Get a PhotoAsset of subtype MOVING_PHOTO
+    let predicates: dataSharePredicates.DataSharePredicates = new dataSharePredicates.DataSharePredicates();
+    predicates.equalTo(photoAccessHelper.PhotoKeys.PHOTO_SUBTYPE, photoAccessHelper.PhotoSubtype.MOVING_PHOTO);
+    let fetchOptions: photoAccessHelper.FetchOptions = {
+      fetchColumns: [],
+      predicates: predicates
+    };
+    let assetResult: photoAccessHelper.FetchResult<photoAccessHelper.PhotoAsset> = await helper.getAssets fetchOptions);
+    let asset: photoAccessHelper.PhotoAsset = await assetResult.getFirstObject();
+    assetResult.close();
+
+    // Define the handler with done captured
+    class InvalidURIHandler implements photoAccessHelper.MediaAssetDataHandler<photoAccessHelper.MovingPhoto> {
+      constructor(public done: Function) {}
+
+      async onDataPrepared(movingPhoto: photoAccessHelper.MovingPhoto) {
+        if (movingPhoto === undefined) {
+          console.error('Error occurred when preparing data');
+          this.done();
+          return;
+        }
+        try {
+          // Pass invalid URIs
+          await movingPhoto.requestContent('http://example.com', 'http://example.com');
+          console.error('Expected error, but none was thrown');
+          expect(false).assertTrue();
+        } catch (err) {
+          console.info(`Error code: ${err.code}, message: ${err.message}`);
+          expect(err.code).assertEqual(401);
+        }
+        this.done();
+      }
+    }
+
+    let handler = new InvalidURIHandler(done);
+    let requestOptions: photoAccessHelper.RequestOptions = {
+      deliveryMode: photoAccessHelper.DeliveryMode.FAST_MODE,
+    }
+    let requestId: string = await photoAccessHelper.MediaAssetManager.requestMovingPhoto(testContext, asset, requestOptions, handler);
+
+  } catch (error) {
+    console.info `${testNum} failed, error: ${error}`
+    expect(false).assertTrue();
+    done();
+  }
+});
