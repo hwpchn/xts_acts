@@ -1,0 +1,84 @@
+describe("getMovingPhotoPermissionTest", () => {
+  beforeAll(async () => {
+    console.info('beforeAll case for permission-denied tests');
+    await driveFn(); // 初始化环境，但不调用 getPermission()
+    await sleep(1000);
+  });
+
+  // 定义权限不足处理器类
+  class PermissionDeniedHandler implements photoAccessHelper.MediaAssetDataHandler<photoAccessHelper.MovingPhoto> {
+    async onDataPrepared(movingPhoto: photoAccessHelper.MovingPhoto) {
+      console.log("PermissionDeniedHandler::movingPhoto onDataPrepared");
+      try {
+        let imageFileUri: string = "file://ohos.acts.multimedia.photoaccess/data/storage/el2/base/haps/entry_test/photos/ImageFile.jpg";
+        let videoFileUri: string = "file://ohos.acts.multimedia.photoaccess/data/storage/el2/base/haps/entry_test/photos/VideoFile.mp4";
+        await movingPhoto.requestContent(imageFileUri, videoFileUri);
+        console.error("PermissionDeniedHandler: requestContent should have thrown an error");
+        expect(false).assertTrue();
+      } catch (error) {
+        console.log(`PermissionDeniedHandler: caught error with code ${error.code}`);
+        expect(error.code).assertEqual(201); // 断言错误码为 201
+      }
+    }
+  }
+
+  // 定义无权限环境下的请求函数
+  const requestMovingPhotoContentNoPermission = async (done: Function, testNum: string, caseNum: number) => {
+    try {
+      let predicates = new dataSharePredicates.DataSharePredicates();
+      predicates.equalTo(photoAccessHelper.PhotoKeys.PHOTO_SUBTYPE, photoAccessHelper.PhotoSubtype.MOVING_PHOTO);
+      let fetchOptions: photoAccessHelper.FetchOptions = {
+        fetchColumns: [],
+        predicates: predicates
+      };
+      let assetResult = await phAccessHelper.getAssets(fetchOptions);
+      if (assetResult.getCount() <= 0) {
+        console.error(`${testNum}::no moving photo assets found`);
+        expect(false).assertTrue();
+        done();
+        return;
+      }
+      let asset = await assetResult.getFirstObject();
+      let requestOptions: photoAccessHelper.RequestOptions = {
+        deliveryMode: photoAccessHelper.DeliveryMode.FAST_MODE,
+      };
+      let handler: photoAccessHelper.MediaAssetDataHandler<photoAccessHelper.MovingPhoto>;
+      switch (caseNum) {
+        case 1:
+          handler = new PermissionDeniedHandler();
+          console.log(`${testNum}::handler::PermissionDeniedHandler`);
+          break;
+        default:
+          console.error(`${testNum}::requestMovingPhotoContentNoPermission::illegal case_num: ${caseNum}`);
+          expect(false).assertTrue();
+          done();
+          return;
+      }
+      let requestId = await photoAccessHelper.MediaAssetManager.requestMovingPhoto(testContext, asset, requestOptions, handler);
+      if (requestId == undefined) {
+        console.error(`${testNum}::failed to request moving photo::requestId is undefined!`);
+        expect(false).assertTrue();
+        done();
+      }
+    } catch (err) {
+      console.error(`${testNum}::failed to request moving photo, error code is ${err.code}, message is ${err.message}`);
+      expect(false).assertTrue();
+      done();
+    }
+  };
+
+  /**
+   * @tc.number    : SUB_PHOTOACCESS_HELPER_REQUEST_CONTENT_PERMISSION_0001
+   * @tc.name      : request_moving_photo_content_permission_0001
+   * @tc.desc      : Test requestContent without permission, expect error 201
+   * @tc.size      : MEDIUM
+   * @tc.type      : Function
+   * @tc.level     : Level 0
+   */
+  it('request_moving_photo_content_permission_0001', 0, async (done: Function) => {
+    const testNum = 'request_moving_photo_content_permission_0001';
+    await requestMovingPhotoContentNoPermission(done, testNum, 1); // 调用无权限函数
+    await sleep(1000); // 等待处理器完成
+    done();
+  });
+});
