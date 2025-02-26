@@ -1,40 +1,32 @@
-async function testMultiExposure() {
-  console.info('testMultiExposure Demo');
-  try {
-    // 获取所有照片资产
-    let predicates = new dataSharePredicates.DataSharePredicates();
-    let fetchOptions = {
-      fetchColumns: [],
-      predicates: predicates
-    };
-    let fetchResult = await phAccessHelper.getAssets fetchOptions);
-    let assets = await fetchResult.getObjects();
+import { dataSharePredicates } from '@kit.ArkData';
+import photoAccessHelper from '@kit.ArkData';
 
-    // 假设第一个资产是需要修改的对象
-    let assetToModify = assets[0];
+async function testMultiExposureEffect() {
+  console.info('testMultiExposureEffect 开始测试');
 
-    // 假设第二个资产是图像，第三个是视频
-    let selectedImageAsset = assets[1];
-    let selectedVideoAsset = assets[2];
+  // 1. 获取一个 PhotoAsset（参考 saveFormInfo 示例）
+  let predicates = new dataSharePredicates.DataSharePredicates();
+  let fetchOptions = {
+    fetchColumns: [],
+    predicates: predicates
+  };
+  let fetchResult = await phAccessHelper.getAssets(fetchOptions);
+  let photoAsset = await fetchResult.getFirstObject();
 
-    // 获取 URI
-    let imageFileUri = selectedImageAsset uri;
-    let videoFileUri = selectedVideoAsset uri;
-
-    // 创建更改请求
-    let assetChangeRequest = new photoAccessHelper.MediaAssetChangeRequest assetToModify);
-
-    // 设置效果模式为 MULTI_EXPOSURE
-    assetChangeRequest.setEffectMode(photoAccessHelper.MovingPhotoEffectMode.MULTI_EXPOSURE);
-
-    // 添加资源
-    assetChangeRequest.addResource(photoAccessHelper.ResourceType.IMAGE, imageFileUri);
-    assetChangeRequest.addResource(photoAccessHelper.ResourceType.VIDEO, videoFileUri);
-
-    // 应用更改
-    await phAccessHelper.applyChanges assetChangeRequest);
-    console.info('apply setEffectMode successfully');
-  } catch (err) {
-    console.error(`apply setEffectMode failed with error: ${err.code}, ${err.message}`);
+  // 2. 检查是否是动态照片（简单判断）
+  if (photoAsset.photoType !== photoAccessHelper.PhotoType.MOVING_PHOTO) {
+    console.info('这不是动态照片，测试可能无法继续');
+    return;
   }
+
+  // 3. 设置效果模式为 MULTI_EXPOSURE
+  let assetChangeRequest = new photoAccessHelper.MediaAssetChangeRequest(photoAsset);
+  assetChangeRequest.setEffectMode(photoAccessHelper.MovingPhotoEffectMode.MULTI_EXPOSURE);
+
+  // 4. 应用更改
+  await phAccessHelper.applyChanges(assetChangeRequest);
+  console.info('成功设置 MULTI_EXPOSURE 效果模式');
 }
+
+// 调用函数开始测试
+testMultiExposureEffect();
